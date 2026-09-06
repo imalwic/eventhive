@@ -116,6 +116,41 @@ public class EventController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
+    // Admin endpoint to approve event
+    @PatchMapping("/admin/{eventId}/approve")
+    public ResponseEntity<?> approveEvent(@PathVariable Long eventId, Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(401).build();
+        }
+        return eventRepository.findById(eventId).map(event -> {
+            event.setStatus("APPROVED");
+            eventRepository.save(event);
+            return ResponseEntity.ok(java.util.Map.of("message", "Event approved successfully"));
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    // Admin endpoint to reject event
+    @PatchMapping("/admin/{eventId}/reject")
+    public ResponseEntity<?> rejectEvent(@PathVariable Long eventId, Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(401).build();
+        }
+        return eventRepository.findById(eventId).map(event -> {
+            event.setStatus("REJECTED");
+            eventRepository.save(event);
+            return ResponseEntity.ok(java.util.Map.of("message", "Event rejected"));
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    // Admin: get all events including PENDING
+    @GetMapping("/admin/all")
+    public ResponseEntity<?> getAllEventsAdmin(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(401).build();
+        }
+        return ResponseEntity.ok(eventRepository.findAll());
+    }
+
     @GetMapping("/my")
     public ResponseEntity<Iterable<Event>> getMyEvents(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {

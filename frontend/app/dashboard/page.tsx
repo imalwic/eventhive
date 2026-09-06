@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Ticket, CalendarPlus, Settings, BarChart2, Users, ShieldAlert, CheckCircle2, MessageSquare, CreditCard, Image as ImageIcon, TrendingUp, PieChart as PieChartIcon, Sparkles } from "lucide-react";
+import { Ticket, CalendarPlus, Settings, BarChart2, Users, ShieldAlert, CheckCircle2, MessageSquare, CreditCard, Image as ImageIcon, TrendingUp, PieChart as PieChartIcon, Sparkles, MapPin } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -191,16 +191,19 @@ function AttendeeDashboard() {
   const [prefInput, setPrefInput] = useState<string>("");
   const [loadingRecs, setLoadingRecs] = useState<boolean>(false);
   const [savedEvents, setSavedEvents] = useState<any[]>([]);
+  const [allEvents, setAllEvents] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [bookingsRes, waitlistsRes] = await Promise.all([
+        const [bookingsRes, waitlistsRes, eventsRes] = await Promise.all([
           api.get("/bookings/my-tickets").catch(() => ({ data: [] })),
-          api.get("/waitlist/my").catch(() => ({ data: [] }))
+          api.get("/waitlist/my").catch(() => ({ data: [] })),
+          api.get("/events").catch(() => ({ data: [] }))
         ]);
         setBookings(bookingsRes.data);
         setWaitlists(waitlistsRes.data);
+        setAllEvents(eventsRes.data);
         
         const saved = JSON.parse(localStorage.getItem('savedEvents') || '[]');
         setSavedEvents(saved);
@@ -421,6 +424,51 @@ function AttendeeDashboard() {
           </div>
         )}
       </div>
+
+      {/* Discover Events Section */}
+      <div className="mt-12">
+        <h2 className="text-xl font-bold mb-6 flex items-center justify-between">
+          <span>Discover All Events</span>
+          <button onClick={() => window.location.href = "/events"} className="text-sm text-primary hover:underline font-semibold">View All</button>
+        </h2>
+        
+        {allEvents.length === 0 ? (
+          <div className="text-center py-12 text-foreground/50 bg-secondary/30 rounded-3xl border border-border">
+            No events available right now.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {allEvents.slice(0, 6).map((ev: any) => (
+              <div key={ev.id} className="bg-secondary rounded-3xl overflow-hidden border border-border/50 hover:border-primary/50 transition-colors shadow-lg group cursor-pointer flex flex-col" onClick={() => window.location.href = `/events/${ev.id}`}>
+                <div className="h-40 bg-primary/20 relative">
+                  {ev.venueImageUrl && (
+                    <img src={`http://localhost:8080${ev.venueImageUrl}`} alt="Venue" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80" />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-secondary to-transparent"></div>
+                  <div className="absolute top-4 right-4 bg-background/80 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold border border-border text-foreground">
+                    {ev.category}
+                  </div>
+                </div>
+                <div className="p-6 flex flex-col flex-grow">
+                  <h3 className="text-xl font-black mb-2 group-hover:text-primary transition-colors line-clamp-1">{ev.title}</h3>
+                  <div className="text-sm text-foreground/70 mb-4 flex items-center gap-2">
+                    <MapPin size={16} className="text-primary/70 shrink-0" /> <span className="truncate">{ev.venue}</span>
+                  </div>
+                  <div className="mt-auto pt-4 border-t border-border border-dashed flex items-center justify-between">
+                    <div className="text-xs text-foreground/60 flex flex-col">
+                      <span className="opacity-70">Organizer</span>
+                      <span className="font-bold text-foreground/90 truncate max-w-[120px]" title={ev.organizer?.name}>{ev.organizer?.name || 'Unknown Organizer'}</span>
+                    </div>
+                    <div className="text-primary font-bold text-sm bg-primary/10 px-3 py-1 rounded-full">
+                      {ev.isTicketed ? 'Ticketed' : 'Free Entry'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </motion.div>
   );
 }
@@ -445,7 +493,7 @@ function AdminDashboard() {
     try {
       const [organizersRes, eventsRes, pendingRes, settingsRes, messagesRes, statsRes, pendingPaymentsRes, chartRes] = await Promise.all([
         api.get("/users/organizers"),
-        api.get("/events"),
+        api.get("/events/admin/all"),
         api.get("/users/pending"),
         api.get("/settings"),
         api.get("/contact/messages"),
@@ -842,27 +890,61 @@ function AdminDashboard() {
 
       {activeTab === 'events' && (
         <div className="glass-card p-8 rounded-3xl border border-border">
-          <h2 className="text-xl font-bold mb-6 border-b border-border pb-4">All Platform Events</h2>
+          <h2 className="text-xl font-bold mb-6 border-b border-border pb-4 flex items-center justify-between">
+            All Platform Events
+            <span className="text-sm font-normal text-foreground/50">{events.length} total</span>
+          </h2>
           <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
             {events.length === 0 ? (
               <p className="text-center py-8 text-foreground/50">No events found on the platform.</p>
             ) : (
               events.map(e => (
                 <div key={e.id} className="flex flex-col md:flex-row justify-between items-start md:items-center p-4 border border-border bg-background rounded-2xl gap-4">
-                  <div>
-                    <h3 className="font-bold text-lg">{e.title}</h3>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-bold text-lg">{e.title}</h3>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        e.status === 'APPROVED' ? 'bg-green-500/10 text-green-500' :
+                        e.status === 'REJECTED' ? 'bg-red-500/10 text-red-500' :
+                        'bg-yellow-500/10 text-yellow-500'
+                      }`}>{e.status || 'PENDING'}</span>
+                    </div>
                     <p className="text-sm text-foreground/60">By {e.organizer?.name || 'Unknown'}</p>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <div className="text-right">
-                      <p className="text-xs font-semibold">{e.date} • {e.time}</p>
-                      <p className="text-xs text-foreground/50">{e.location}</p>
-                    </div>
-                    <button 
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {(e.status === 'PENDING' || !e.status) && (
+                      <>
+                        <button
+                          onClick={async () => {
+                            try {
+                              await api.patch(`/events/admin/${e.id}/approve`);
+                              toast.success('Event approved!');
+                              fetchData();
+                            } catch { toast.error('Failed to approve'); }
+                          }}
+                          className="text-xs font-bold text-green-500 hover:bg-green-500 hover:text-white border border-green-500/30 px-3 py-1.5 rounded-lg transition-colors"
+                        >
+                          Approve
+                        </button>
+                        <button
+                          onClick={async () => {
+                            try {
+                              await api.patch(`/events/admin/${e.id}/reject`);
+                              toast.success('Event rejected.');
+                              fetchData();
+                            } catch { toast.error('Failed to reject'); }
+                          }}
+                          className="text-xs font-bold text-yellow-500 hover:bg-yellow-500 hover:text-white border border-yellow-500/30 px-3 py-1.5 rounded-lg transition-colors"
+                        >
+                          Reject
+                        </button>
+                      </>
+                    )}
+                    <button
                       onClick={() => handleDeleteEvent(e.id)}
                       className="text-xs font-bold text-red-500 hover:bg-red-500 hover:text-white border border-red-500/20 px-3 py-2 rounded-lg transition-colors shrink-0"
                     >
-                      Delete Event
+                      Delete
                     </button>
                   </div>
                 </div>

@@ -13,7 +13,7 @@ public class CorsConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**") // All APIs are needed
                 .allowedOrigins("http://localhost:3000") // React/Next.js දුවන Port එක (ඔයාගේ Frontend එකේ Port එක අනුව මේක පස්සේ වෙනස් කරන්න පුළුවන්)
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true);
     }
