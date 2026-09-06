@@ -216,6 +216,75 @@ function AttendeeDashboard() {
     fetchData();
   }, []);
 
+  const handlePayPending = async (booking: any) => {
+    try {
+      const toastId = toast.loading("Preparing payment...");
+      const hashRes = await api.get(`/payments/generate-hash/${booking.id}`);
+      const paymentData = hashRes.data;
+      toast.dismiss(toastId);
+
+      const payhere = (window as any).payhere;
+      if (payhere) {
+        payhere.onCompleted = async function (orderId: any) {
+          toast.success("Payment completed successfully!");
+          
+          const formData = new FormData();
+          formData.append('merchant_id', paymentData.merchant_id);
+          formData.append('order_id', orderId);
+          formData.append('payhere_amount', paymentData.amount.toString());
+          formData.append('payhere_currency', paymentData.currency);
+          formData.append('status_code', '2');
+          formData.append('md5sig', 'mock_sig_for_localhost');
+          
+          try {
+            await fetch('http://localhost:8080/api/payments/notify', {
+               method: 'POST',
+               body: formData
+            });
+          } catch(e) {}
+
+          setTimeout(() => window.location.reload(), 2000);
+        };
+
+        payhere.onDismissed = function () {
+          toast.error("Payment cancelled");
+        };
+
+        payhere.onError = function (error: any) {
+          toast.error("Payment error: " + error);
+        };
+
+        const payment = {
+          "sandbox": true,
+          "merchant_id": paymentData.merchant_id,
+          "return_url": "http://localhost:3000/dashboard",
+          "cancel_url": "http://localhost:3000/dashboard",
+          "notify_url": "https://eventhive-webhook.netlify.app/api/payments/notify",
+          "order_id": paymentData.order_id,
+          "items": "Event Ticket - " + (booking.event?.title || ""),
+          "amount": Number(paymentData.amount).toFixed(2),
+          "currency": "LKR",
+          "hash": paymentData.hash,
+          "first_name": "Attendee",
+          "last_name": "User",
+          "email": "user@example.com",
+          "phone": "0770000000",
+          "address": "Colombo",
+          "city": "Colombo",
+          "country": "Sri Lanka"
+        };
+        console.log("PayHere Payload:", payment);
+        payhere.startPayment(payment);
+      } else {
+        toast.error("PayHere SDK not loaded");
+      }
+    } catch (err) {
+      toast.dismiss();
+      toast.error("Failed to initiate payment");
+      console.error(err);
+    }
+  };
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
@@ -285,35 +354,44 @@ function AttendeeDashboard() {
                     
                     <div className="flex items-center justify-between pt-4 border-t border-border border-dashed">
                       <div className="text-primary font-black text-lg">Rs. {booking.totalAmount}</div>
-                      <button 
-                        onClick={() => {
-                          const modal = document.createElement('div');
-                          modal.className = "fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-sm";
-                          modal.onclick = () => document.body.removeChild(modal);
-                          
-                          const content = document.createElement('div');
-                          content.className = "bg-secondary p-8 rounded-3xl border border-border flex flex-col items-center max-w-sm w-full mx-4";
-                          content.onclick = (e) => e.stopPropagation();
-                          
-                          content.innerHTML = `
-                            <h3 class="text-2xl font-black mb-2 text-center">${booking.event?.title}</h3>
-                            <p class="text-foreground/70 text-sm mb-6 text-center">Scan this code at the entrance</p>
-                            <div class="bg-white p-4 rounded-xl mb-6">
-                              <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${booking.id}" alt="QR Code" class="w-48 h-48" />
-                            </div>
-                            <button class="w-full py-3 bg-primary text-primary-foreground rounded-xl font-bold">Close</button>
-                          `;
-                          
-                          const closeBtn = content.querySelector('button');
-                          if(closeBtn) closeBtn.onclick = () => document.body.removeChild(modal);
-                          
-                          modal.appendChild(content);
-                          document.body.appendChild(modal);
-                        }}
-                        className="px-4 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-primary/90 transition-colors"
-                      >
-                        <Ticket size={16} /> View Ticket
-                      </button>
+                      {booking.status === 'PENDING_PAYMENT' ? (
+                        <button 
+                          onClick={() => handlePayPending(booking)}
+                          className="px-4 py-2 bg-yellow-500/20 text-yellow-500 rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-yellow-500/30 transition-colors"
+                        >
+                          <CreditCard size={16} /> Pay Now
+                        </button>
+                      ) : (
+                        <button 
+                          onClick={() => {
+                            const modal = document.createElement('div');
+                            modal.className = "fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-sm";
+                            modal.onclick = () => document.body.removeChild(modal);
+                            
+                            const content = document.createElement('div');
+                            content.className = "bg-secondary p-8 rounded-3xl border border-border flex flex-col items-center max-w-sm w-full mx-4";
+                            content.onclick = (e) => e.stopPropagation();
+                            
+                            content.innerHTML = `
+                              <h3 class="text-2xl font-black mb-2 text-center">${booking.event?.title}</h3>
+                              <p class="text-foreground/70 text-sm mb-6 text-center">Scan this code at the entrance</p>
+                              <div class="bg-white p-4 rounded-xl mb-6">
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${booking.id}" alt="QR Code" class="w-48 h-48" />
+                              </div>
+                              <button class="w-full py-3 bg-primary text-primary-foreground rounded-xl font-bold">Close</button>
+                            `;
+                            
+                            const closeBtn = content.querySelector('button');
+                            if(closeBtn) closeBtn.onclick = () => document.body.removeChild(modal);
+                            
+                            modal.appendChild(content);
+                            document.body.appendChild(modal);
+                          }}
+                          className="px-4 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-primary/90 transition-colors"
+                        >
+                          <Ticket size={16} /> View Ticket
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>

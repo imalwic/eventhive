@@ -35,14 +35,18 @@ public class PaymentService {
 
     // Payment Hash එක ජෙනරේට් කරන Method එක
     public String generatePaymentHash(String orderId, double amount, String currency) {
-        // PayHere එකෙන් ගාණ ඉල්ලන්නේ දශම ස්ථාන 2කට (උදා: 15000.00)
-        DecimalFormat df = new DecimalFormat("0.00");
+        // Force US Locale to ensure '.' is used as decimal separator instead of ',' in some locales
+        java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols(java.util.Locale.US);
+        java.text.DecimalFormat df = new java.text.DecimalFormat("0.00", symbols);
         String formattedAmount = df.format(amount);
 
         // Hash එක හදන ෆෝමියුලා එක:
         // md5(merchant_id + order_id + amount + currency + md5(merchant_secret))
-        String hashedSecret = getMd5(merchantSecret).toUpperCase();
-        String hashInput = merchantId + orderId + formattedAmount + currency + hashedSecret;
+        String mId = merchantId != null ? merchantId.trim() : "";
+        String mSecret = merchantSecret != null ? merchantSecret.trim() : "";
+        
+        String hashedSecret = getMd5(mSecret).toUpperCase();
+        String hashInput = mId + orderId.trim() + formattedAmount + currency.trim() + hashedSecret;
 
         return getMd5(hashInput).toUpperCase();
     }

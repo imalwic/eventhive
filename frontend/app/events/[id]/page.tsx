@@ -191,7 +191,7 @@ export default function EventPage() {
           notify_url: "https://your-ngrok-url/api/payments/notify", // Backend Webhook URL
           order_id: paymentData.order_id,
           items: "Event Tickets: " + event.title,
-          amount: paymentData.amount,
+          amount: Number(paymentData.amount).toFixed(2),
           currency: paymentData.currency,
           hash: paymentData.hash,
           first_name: "EventHive",
@@ -202,7 +202,7 @@ export default function EventPage() {
           city: "Colombo",
           country: "Sri Lanka"
         };
-
+        console.log("PayHere Payload:", payment);
         window.payhere.startPayment(payment);
       } else {
         toast.error("PayHere SDK not loaded. Refresh the page.");

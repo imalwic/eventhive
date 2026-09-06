@@ -101,7 +101,7 @@ export default function PackagesPage() {
           merchant_id: merchant_id,
           return_url: window.location.origin + "/dashboard",
           cancel_url: window.location.origin + "/dashboard/organizer/packages",
-          notify_url: "http://localhost:8080/api/payments/notify", 
+          notify_url: "https://eventhive-webhook.netlify.app/api/payments/notify", 
           order_id: order_id,
           items: selectedPackage.name + " Package",
           amount: Number(amount).toFixed(2),
