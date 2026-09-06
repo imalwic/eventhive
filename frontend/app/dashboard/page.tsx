@@ -55,13 +55,26 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-background">
       {role !== "ADMIN" && <Chatbot />}
-      <div className="container mx-auto px-6 py-12">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-4">
-          <div>
-            <h1 className="text-4xl font-black mb-2">Dashboard</h1>
-            <p className="text-foreground/70">Welcome back, {user?.name}!</p>
+      {/* Premium Hero Banner */}
+      <div className="relative overflow-hidden border-b border-border bg-gradient-to-br from-background via-primary/5 to-background">
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03]"></div>
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-accent/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="container mx-auto px-6 py-10 relative z-10">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary/70 mb-2">✦ Your Personal Space</p>
+              <h1 className="text-4xl md:text-5xl font-black mb-2 bg-gradient-to-r from-foreground via-foreground to-foreground/60 bg-clip-text text-transparent">Dashboard</h1>
+              <p className="text-foreground/60 text-base">Welcome back, <span className="text-foreground font-semibold">{user?.name}</span> 👋</p>
+            </div>
+            <div className="hidden md:flex items-center gap-3 bg-secondary/50 backdrop-blur-md border border-border px-5 py-3 rounded-2xl">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-sm font-semibold text-foreground/70">EventHive is live</span>
+            </div>
           </div>
         </div>
+      </div>
+      <div className="container mx-auto px-6 py-10">
 
         {role === "ORGANIZER" && (typeof window !== "undefined" ? localStorage.getItem("uiMode") || "ORGANIZER" : "ORGANIZER") === "ORGANIZER" && <OrganizerDashboard />}
         {(role === "ATTENDEE" || (role === "ORGANIZER" && (typeof window !== "undefined" ? localStorage.getItem("uiMode") : "") === "ATTENDEE")) && <AttendeeDashboard />}
@@ -295,33 +308,45 @@ function AttendeeDashboard() {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-        <div className="col-span-1 lg:col-span-2 glass-card p-6 rounded-3xl border border-border bg-gradient-to-r from-primary/10 to-accent/10 flex flex-col justify-between">
-          <div>
-            <h3 className="text-lg font-bold mb-2">Ready for your next event?</h3>
-            <p className="text-foreground/70 text-sm mb-4">Discover new experiences trending in your area.</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        {/* Hero CTA Card */}
+        <div className="col-span-1 lg:col-span-2 relative overflow-hidden glass-card p-7 rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/15 via-primary/5 to-accent/10 flex flex-col justify-between group hover:border-primary/40 transition-all">
+          <div className="absolute -top-8 -right-8 w-36 h-36 bg-primary/20 rounded-full blur-2xl pointer-events-none group-hover:bg-primary/30 transition-all"></div>
+          <div className="absolute -bottom-8 -left-4 w-24 h-24 bg-accent/20 rounded-full blur-xl pointer-events-none"></div>
+          <div className="relative z-10">
+            <span className="inline-block px-3 py-1 bg-primary/20 text-primary text-[10px] font-black uppercase tracking-widest rounded-full mb-3 border border-primary/30">✦ Explore</span>
+            <h3 className="text-xl font-black mb-2 leading-tight">Ready for your<br/>next event?</h3>
+            <p className="text-foreground/60 text-sm mb-5">Discover experiences trending in your area.</p>
           </div>
-          <button onClick={() => window.location.href = "/events"} className="px-4 py-2 bg-background border border-border rounded-xl text-sm font-semibold hover:bg-secondary transition-colors w-max">Browse Events</button>
+          <button onClick={() => window.location.href = "/events"} className="relative z-10 px-5 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-bold hover:bg-primary/90 hover:scale-105 transition-all w-max shadow-lg shadow-primary/20">Browse Events →</button>
         </div>
         {[
-          { label: "My Bookings", value: bookings.length.toString(), icon: <Ticket /> },
-          { label: "Waitlisted", value: waitlists.length.toString(), icon: <Settings /> },
+          { label: "My Bookings", value: bookings.length.toString(), icon: <Ticket size={22} />, color: "text-primary", bg: "bg-primary/10", glow: "shadow-primary/20" },
+          { label: "Waitlisted", value: waitlists.length.toString(), icon: <Calendar size={22} />, color: "text-accent", bg: "bg-accent/10", glow: "shadow-accent/20" },
         ].map((stat, i) => (
-          <div key={i} className="glass-card p-6 rounded-3xl border border-border flex items-center justify-between">
-            <div>
-              <p className="text-foreground/60 text-sm font-medium mb-1">{stat.label}</p>
-              <p className="text-2xl font-black">{stat.value}</p>
-            </div>
-            <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center text-accent">
+          <motion.div key={i} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.1 }} className="glass-card p-6 rounded-3xl border border-border hover:border-primary/30 transition-all flex flex-col justify-between group">
+            <div className={`w-12 h-12 ${stat.bg} rounded-2xl flex items-center justify-center ${stat.color} mb-4 shadow-lg ${stat.glow} group-hover:scale-110 transition-transform`}>
               {stat.icon}
             </div>
-          </div>
+            <div>
+              <p className="text-3xl font-black mb-1">{stat.value}</p>
+              <p className="text-foreground/50 text-xs font-semibold uppercase tracking-wider">{stat.label}</p>
+            </div>
+          </motion.div>
         ))}
       </div>
 
       <div className="space-y-8">
         <div className="glass-card p-8 rounded-3xl border border-border">
-          <h2 className="text-xl font-bold mb-6 border-b border-border pb-4">Digital Tickets</h2>
+          <div className="flex items-center gap-3 mb-6 border-b border-border pb-5">
+            <div className="w-9 h-9 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+              <Ticket size={18} />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold leading-none">Digital Tickets</h2>
+              <p className="text-xs text-foreground/50 mt-0.5">Your event passes</p>
+            </div>
+          </div>
           
           {loading ? (
             <div className="text-center py-12 text-foreground/50">Loading tickets...</div>
@@ -443,9 +468,15 @@ function AttendeeDashboard() {
         {/* Waitlist Section */}
         {waitlists.length > 0 && (
           <div className="glass-card p-8 rounded-3xl border border-border border-l-4 border-l-accent">
-            <h2 className="text-xl font-bold mb-6 border-b border-border pb-4 flex items-center gap-2">
-              <Settings className="text-accent" /> Your Waitlists
-            </h2>
+            <div className="flex items-center gap-3 mb-6 border-b border-border pb-5">
+              <div className="w-9 h-9 bg-accent/10 rounded-xl flex items-center justify-center text-accent">
+                <Calendar size={18} />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold leading-none">Your Waitlists</h2>
+                <p className="text-xs text-foreground/50 mt-0.5">You'll be notified when a seat opens</p>
+              </div>
+            </div>
             <div className="space-y-4">
               {waitlists.map((wl: any) => (
                 <div key={wl.id} className="flex items-center justify-between p-4 bg-secondary rounded-2xl">
@@ -468,9 +499,15 @@ function AttendeeDashboard() {
       {/* Saved Events Section */}
       {savedEvents.length > 0 && (
         <div className="glass-card p-8 rounded-3xl border border-border mt-8">
-          <h2 className="text-xl font-bold mb-6 border-b border-border pb-4 flex items-center gap-2">
-            <Ticket className="text-pink-500" /> Saved Events (Wishlist)
-          </h2>
+          <div className="flex items-center gap-3 mb-6 border-b border-border pb-5">
+            <div className="w-9 h-9 bg-pink-500/10 rounded-xl flex items-center justify-center text-pink-500">
+              <Star size={18} />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold leading-none">Saved Events</h2>
+              <p className="text-xs text-foreground/50 mt-0.5">Your personal wishlist</p>
+            </div>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {savedEvents.map((ev: any) => (
               <div key={ev.id} className="bg-secondary rounded-2xl overflow-hidden border border-border/50 group cursor-pointer" onClick={() => window.location.href = `/events/${ev.id}`}>
@@ -509,10 +546,16 @@ function AttendeeDashboard() {
       )}
 
       {/* AI Recommendations Section */}
-      <div className="glass-card p-8 rounded-3xl border border-border mt-8">
-        <h2 className="text-xl font-bold mb-6 border-b border-border pb-4 flex items-center gap-2">
-          <Sparkles className="text-primary" /> Ask AI for Recommendations
-        </h2>
+      <div className="glass-card p-8 rounded-3xl border border-primary/20 mt-8 bg-gradient-to-br from-primary/5 to-transparent">
+        <div className="flex items-center gap-3 mb-6 border-b border-border pb-5">
+          <div className="w-9 h-9 bg-primary/15 rounded-xl flex items-center justify-center text-primary shadow-lg shadow-primary/20">
+            <Sparkles size={18} />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold leading-none">AI Recommendations</h2>
+            <p className="text-xs text-foreground/50 mt-0.5">Powered by Qwen AI</p>
+          </div>
+        </div>
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <input 
             type="text" 
@@ -550,10 +593,18 @@ function AttendeeDashboard() {
 
       {/* Discover Events Section */}
       <div className="mt-12">
-        <h2 className="text-xl font-bold mb-6 flex items-center justify-between">
-          <span>Discover All Events</span>
-          <button onClick={() => window.location.href = "/events"} className="text-sm text-primary hover:underline font-semibold">View All</button>
-        </h2>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-accent/10 rounded-xl flex items-center justify-center text-accent">
+              <Zap size={18} />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold leading-none">Discover Events</h2>
+              <p className="text-xs text-foreground/50 mt-0.5">Upcoming events near you</p>
+            </div>
+          </div>
+          <button onClick={() => window.location.href = "/events"} className="text-xs font-bold text-primary bg-primary/10 hover:bg-primary hover:text-primary-foreground px-4 py-2 rounded-xl transition-all">View All →</button>
+        </div>
         
         {allEvents.filter((ev: any) => new Date(ev.eventDate) >= new Date()).length === 0 ? (
           <div className="text-center py-12 text-foreground/50 bg-secondary/30 rounded-3xl border border-border">
