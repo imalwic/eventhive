@@ -30,8 +30,17 @@ export default function Chatbot() {
     try {
       // Calling the backend AI endpoint
       const res = await api.post("/ai/chat", { message: userMessage });
-      const aiResponse = res.data.reply || "I couldn't process that. Try asking about events this weekend!";
-      setMessages(prev => [...prev, { text: aiResponse, isUser: false }]);
+      const rawReply = res.data.reply || "I couldn't process that. Try asking about events this weekend!";
+      // Remove <think>...</think> blocks and clean up markdown formatting
+      const cleanReply = rawReply
+        .replace(/<think>[\s\S]*?<\/think>/gi, '')
+        .replace(/\*\*(.*?)\*\*/g, '$1')
+        .replace(/\*(.*?)\*/g, '$1')
+        .replace(/`(.*?)`/g, '$1')
+        .replace(/#{1,6}\s/g, '')
+        .replace(/^\s*[-*]\s/gm, '• ')
+        .trim();
+      setMessages(prev => [...prev, { text: cleanReply, isUser: false }]);
     } catch (error) {
       console.error("AI chat error:", error);
       setMessages(prev => [...prev, { text: "Sorry, I'm having trouble connecting right now. Please try again later.", isUser: false }]);
