@@ -108,8 +108,8 @@ export default function EventsPage() {
                 className="group rounded-3xl border border-border bg-card overflow-hidden hover:shadow-2xl hover:shadow-primary/10 transition-all hover:-translate-y-2 cursor-pointer flex flex-col"
               >
                 <div className="h-48 bg-gradient-to-br from-secondary to-border relative overflow-hidden">
-                   {event.venueImageUrl && (
-                     <img src={`http://localhost:8080${event.venueImageUrl}`} alt="Venue" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                   {(event as any).venueImageUrl && (
+                     <img src={`http://localhost:8080${(event as any).venueImageUrl}`} alt="Venue" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                    )}
                    <div className="absolute inset-0 bg-primary/10 group-hover:bg-primary/20 transition-colors"></div>
                    <div className="absolute top-4 left-4 px-3 py-1 bg-background/80 backdrop-blur-md rounded-full text-xs font-semibold">

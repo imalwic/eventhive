@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Sparkles, User as UserIcon, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
 import api from "@/lib/axios";
@@ -45,8 +46,9 @@ export default function Navbar() {
   return (
     <nav className="border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-50">
       <div className="container mx-auto px-6 h-20 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 text-2xl font-black tracking-tighter">
-          <span className="text-primary"><Sparkles size={24} className="inline"/> Event</span>Hive
+        <Link href="/" className="flex items-center gap-3">
+          <Image src="/logo-theme.svg" alt="EventHive Logo" width={44} height={44} className="drop-shadow-lg" />
+          <span className="text-2xl font-black tracking-tighter hidden sm:block text-primary">EventHive</span>
         </Link>
         
         <div className="flex items-center gap-4">

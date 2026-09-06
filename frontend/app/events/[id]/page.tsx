@@ -127,6 +127,7 @@ export default function EventPage() {
   };
 
   const handleBook = async () => {
+    if (!event) return;
     if (selectedSeats.length === 0) return;
     setBookingLoading(true);
     
@@ -389,7 +390,7 @@ export default function EventPage() {
                       <div key={seatId} className="flex justify-between items-center p-3 bg-secondary rounded-xl">
                         <div>
                           <p className="font-bold text-sm">Seat {seat.seatNumber}</p>
-                          <p className="text-xs text-foreground/50">{seat.category}</p>
+                          <p className="text-xs text-foreground/50">{seat.tierName || 'Standard'}</p>
                         </div>
                         <p className="font-semibold text-sm">Rs. {seat.price}</p>
                       </div>

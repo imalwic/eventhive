@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { User, Lock, Mail, ArrowRight, Phone, Eye, EyeOff, Check, X, AlertCircle, UploadCloud } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { GoogleLogin } from '@react-oauth/google';
 import api from "@/lib/axios";
 import { useRouter } from "next/navigation";
@@ -164,7 +165,11 @@ export default function RegisterPage() {
       >
         <div className="glass-card p-8 rounded-3xl shadow-2xl border border-border bg-card/80">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2">Create an Account</h1>
+            <div className="flex justify-center mb-4 items-center gap-3">
+              <Image src="/logo-theme.svg" alt="EventHive Logo" width={56} height={56} className="drop-shadow-xl" />
+              <span className="text-3xl font-black tracking-tighter text-primary">EventHive</span>
+            </div>
+            <h1 className="text-2xl font-bold mb-2">Create an Account</h1>
             <p className="text-foreground/60 text-sm">Join EventHive today.</p>
           </div>
 

@@ -34,8 +34,7 @@ export default function TicketScannerModal({ isOpen, onClose }: { isOpen: boolea
           {
             fps: 10,
             qrbox: { width: 250, height: 250 },
-            disableFlip: false, // Re-enable to avoid mirroring issues
-            formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE]
+            disableFlip: false // Re-enable to avoid mirroring issues
           },
           onScanSuccess,
           onScanFailure
@@ -47,8 +46,7 @@ export default function TicketScannerModal({ isOpen, onClose }: { isOpen: boolea
             {
               fps: 10,
               qrbox: { width: 250, height: 250 },
-              disableFlip: false,
-              formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE]
+              disableFlip: false
             },
             onScanSuccess,
             onScanFailure

@@ -37,6 +37,12 @@ public class AuthController {
             String email = loginData.get("email");
             String password = loginData.get("password");
 
+            // Check if user is PENDING
+            java.util.Optional<com.eventhive.backend.entity.User> userOpt = userRepository.findByEmail(email);
+            if (userOpt.isPresent() && "PENDING".equals(userOpt.get().getStatus())) {
+                return ResponseEntity.status(403).body(Map.of("message", "Your account is pending admin approval."));
+            }
+
             // 1. check the email and password are correctly
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(email, password)
@@ -94,6 +100,8 @@ public class AuthController {
                     String subject = "Welcome to EventHive!";
                     String body = "Hi " + newUser.getName() + ",\n\nSuccessfully registered! Start discovering and enjoying events on EventHive.\n\nBest regards,\nEventHive Team";
                     emailService.sendEmail(newUser.getEmail(), subject, body);
+                } else if ("PENDING".equals(existingUserOpt.get().getStatus())) {
+                    return ResponseEntity.status(403).body(Map.of("message", "Your account is pending admin approval."));
                 }
                 
                 // Generate token

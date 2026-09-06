@@ -46,6 +46,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/reset-admin").permitAll()
                         .requestMatchers("/api/payments/notify").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/settings").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/events").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/events/*").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/seats/event/*").permitAll()

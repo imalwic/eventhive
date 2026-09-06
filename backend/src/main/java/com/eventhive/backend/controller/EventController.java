@@ -94,7 +94,7 @@ public class EventController {
 
     @GetMapping
     public ResponseEntity<Iterable<Event>> getAllEvents() {
-        return ResponseEntity.ok(eventRepository.findAll());
+        return ResponseEntity.ok(eventRepository.findByStatusIn(java.util.Arrays.asList("APPROVED", "PUBLISHED")));
     }
 
     @GetMapping("/{eventId}")
@@ -122,10 +122,9 @@ public class EventController {
             return ResponseEntity.status(401).build();
         }
         String userEmail = authentication.getName();
-        // Assuming findByOrganizerEmail exists, else we need to create it. We can just return all for now to keep it simple, or implement it in repository.
-        // Let's implement it in repository or fallback to filtering manually.
-        // Since we don't have findByOrganizerEmail right now, let's just return all and fix it later if needed.
-        return ResponseEntity.ok(eventRepository.findAll()); 
+        return userRepository.findByEmail(userEmail).map(user -> {
+            return ResponseEntity.ok((Iterable<Event>) eventRepository.findByOrganizerId(user.getId()));
+        }).orElse(ResponseEntity.status(401).build());
     }
 
     @GetMapping("/my/stats")
