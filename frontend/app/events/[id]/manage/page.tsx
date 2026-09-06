@@ -6,7 +6,7 @@ import api from "@/lib/axios";
 import { motion } from "framer-motion";
 import { toast } from "react-hot-toast";
 import Link from "next/link";
-import { ArrowLeft, Ticket, Settings, CheckCircle2, DollarSign, Users, Grid as GridIcon, Scan } from "lucide-react";
+import { ArrowLeft, Ticket, Settings, CheckCircle2, DollarSign, Users, Grid as GridIcon, Scan, Image as ImageIcon, Loader2 } from "lucide-react";
 import TicketScannerModal from "@/components/TicketScannerModal";
 
 // Import the new VisualSeatEditor at the top
@@ -144,6 +144,28 @@ export default function ManageEventPage() {
   const [capacity, setCapacity] = useState("");
   const [addingCategory, setAddingCategory] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    const formData = new FormData();
+    formData.append("image", file);
+    try {
+      const res = await api.post(`/events/${id}/image`, formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      setEvent((prev: any) => ({ ...prev, venueImageUrl: res.data.imageUrl }));
+      toast.success("Image uploaded successfully!");
+    } catch (err: any) {
+      console.error("Failed to upload image", err);
+      toast.error("Failed to upload image.");
+    } finally {
+      setUploadingImage(false);
+    }
+  };
 
   const [attendees, setAttendees] = useState<any[]>([]);
   const [waitlist, setWaitlist] = useState<any[]>([]);
@@ -493,7 +515,29 @@ export default function ManageEventPage() {
                 </div>
                 <div>
                   <p className="text-foreground/50 font-semibold mb-1">Description</p>
-                  <p className="line-clamp-4 leading-relaxed">{event.description}</p>
+                  <p className="line-clamp-4 leading-relaxed mb-4">{event.description}</p>
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-foreground/50 font-semibold">Event Image</p>
+                    {uploadingImage && <Loader2 className="animate-spin text-primary w-4 h-4" />}
+                  </div>
+                  {event.venueImageUrl ? (
+                    <div className="relative group rounded-xl overflow-hidden h-40 border border-border">
+                      <img src={`http://localhost:8080${event.venueImageUrl.startsWith('/') ? '' : '/uploads/events/'}${event.venueImageUrl}`} alt="Event" className="w-full h-full object-cover" />
+                      <label className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-white font-bold backdrop-blur-sm">
+                        <ImageIcon className="mr-2" size={18} /> Change Image
+                        <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={uploadingImage} />
+                      </label>
+                    </div>
+                  ) : (
+                    <label className={`block w-full p-6 border-2 border-dashed border-border rounded-xl text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-all ${uploadingImage ? 'opacity-50 pointer-events-none' : ''}`}>
+                      <ImageIcon className="mx-auto mb-2 text-foreground/40" size={28} />
+                      <span className="text-sm font-bold text-foreground/70">Upload Event Image</span>
+                      <p className="text-xs text-foreground/40 mt-1">Make your event stand out!</p>
+                      <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={uploadingImage} />
+                    </label>
+                  )}
                 </div>
               </div>
             </motion.div>

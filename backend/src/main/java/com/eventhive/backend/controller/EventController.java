@@ -77,7 +77,7 @@ public class EventController {
                 java.nio.file.Path filePath = uploadPath.resolve(filename);
                 java.nio.file.Files.copy(image.getInputStream(), filePath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
                 
-                event.setVenueImageUrl(filename);
+                event.setVenueImageUrl("/uploads/events/" + filename);
                 eventRepository.save(event);
                 return ResponseEntity.ok(java.util.Map.of("message", "Image uploaded successfully", "imageUrl", filename));
             } catch (java.io.IOException e) {

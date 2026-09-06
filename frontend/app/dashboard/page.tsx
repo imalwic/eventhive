@@ -259,7 +259,7 @@ function AttendeeDashboard() {
                 <div key={booking.id} className="flex flex-col bg-secondary rounded-3xl overflow-hidden border border-border/50 hover:border-primary/50 transition-colors shadow-xl group">
                   <div className="h-32 bg-primary/20 relative">
                     {booking.event?.venueImageUrl && (
-                      <img src={`http://localhost:8080${booking.event.venueImageUrl}`} alt="Venue" className="w-full h-full object-cover opacity-50" />
+                      <img src={`http://localhost:8080${booking.event.venueImageUrl.startsWith('/') ? '' : '/uploads/events/'}${booking.event.venueImageUrl}`} alt="Venue" className="w-full h-full object-cover opacity-50" />
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-secondary to-transparent"></div>
                     <div className="absolute bottom-4 left-6 right-6 flex justify-between items-end">
@@ -358,7 +358,7 @@ function AttendeeDashboard() {
               <div key={ev.id} className="bg-secondary rounded-2xl overflow-hidden border border-border/50 group cursor-pointer" onClick={() => window.location.href = `/events/${ev.id}`}>
                 <div className="h-32 bg-primary/20 relative">
                   {ev.venueImageUrl && (
-                    <img src={`http://localhost:8080${ev.venueImageUrl}`} alt="Event" className="w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-500" />
+                    <img src={`http://localhost:8080${ev.venueImageUrl.startsWith('/') ? '' : '/uploads/events/'}${ev.venueImageUrl}`} alt="Event" className="w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-500" />
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-secondary to-transparent"></div>
                   <h4 className="absolute bottom-3 left-4 right-4 font-black text-lg">{ev.title}</h4>
@@ -442,7 +442,7 @@ function AttendeeDashboard() {
               <div key={ev.id} className="bg-secondary rounded-3xl overflow-hidden border border-border/50 hover:border-primary/50 transition-colors shadow-lg group cursor-pointer flex flex-col" onClick={() => window.location.href = `/events/${ev.id}`}>
                 <div className="h-40 bg-primary/20 relative">
                   {ev.venueImageUrl && (
-                    <img src={`http://localhost:8080${ev.venueImageUrl}`} alt="Venue" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80" />
+                    <img src={`http://localhost:8080${ev.venueImageUrl.startsWith('/') ? '' : '/uploads/events/'}${ev.venueImageUrl}`} alt="Venue" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80" />
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-secondary to-transparent"></div>
                   <div className="absolute top-4 right-4 bg-background/80 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold border border-border text-foreground">
