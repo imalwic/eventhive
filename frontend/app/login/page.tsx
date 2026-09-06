@@ -8,6 +8,7 @@ import Image from "next/image";
 import { GoogleLogin } from '@react-oauth/google';
 import api from "@/lib/axios";
 import { useRouter } from "next/navigation";
+import Logo from "@/components/Logo";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -60,9 +61,8 @@ export default function LoginPage() {
       >
         <div className="glass-card p-8 rounded-3xl shadow-2xl border border-border bg-card/80">
           <div className="text-center mb-8">
-            <div className="flex justify-center mb-4 items-center gap-3">
-              <Image src="/logo-theme.svg" alt="EventHive Logo" width={56} height={56} className="drop-shadow-xl" />
-              <span className="text-3xl font-black tracking-tighter text-primary">EventHive</span>
+            <div className="flex justify-center mb-6">
+              <Logo size="lg" asLink={false} />
             </div>
             <h1 className="text-2xl font-bold mb-2">Welcome Back</h1>
             <p className="text-foreground/60 text-sm">Sign in to your EventHive account</p>
