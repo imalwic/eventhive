@@ -39,9 +39,9 @@ public class AIClientService {
         messageUser.put("role", "user");
         messageUser.put("content", userPrompt);
 
-        // 4. Request Body එක හදනවා (Model එක විදියට Llama 3 පාවිච්චි කරනවා)
+        // 4. Request Body එක හදනවා (Model එක විදියට Mixtral පාවිච්චි කරනවා)
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("model", "llama3-8b-8192");
+        requestBody.put("model", "mixtral-8x7b-32768");
         requestBody.put("messages", List.of(messageSystem, messageUser));
         requestBody.put("temperature", 0.7);
 
