@@ -323,78 +323,75 @@ function AttendeeDashboard() {
               <p>You haven't booked any events yet.</p>
             </div>
           ) : (
-            <div className="flex flex-col gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {bookings.map((booking: any) => {
                 const mainTier = booking.seats && booking.seats.length > 0 ? booking.seats[0].tierName : 'General';
                 const getTicketColor = (tierName: string) => {
                     const tier = (tierName || '').toLowerCase();
-                    if (tier.includes('vip') || tier.includes('vvip')) return { bg: 'from-amber-500/10 to-amber-900/20', border: 'border-amber-500/30', text: 'text-amber-500', badge: 'bg-amber-500/20 text-amber-400' };
-                    if (tier.includes('balcony') || tier.includes('odc')) return { bg: 'from-blue-500/10 to-blue-900/20', border: 'border-blue-500/30', text: 'text-blue-500', badge: 'bg-blue-500/20 text-blue-400' };
-                    if (tier.includes('box')) return { bg: 'from-purple-500/10 to-purple-900/20', border: 'border-purple-500/30', text: 'text-purple-500', badge: 'bg-purple-500/20 text-purple-400' };
-                    return { bg: 'from-primary/10 to-secondary', border: 'border-primary/30', text: 'text-primary', badge: 'bg-primary/20 text-primary' };
+                    if (tier.includes('vvip')) return { bg: 'from-amber-400/10 to-amber-700/20', border: 'border-amber-500/40', text: 'text-amber-500', badge: 'bg-gradient-to-r from-amber-600 to-amber-400 text-black', accent: 'text-amber-400' };
+                    if (tier.includes('vip')) return { bg: 'from-purple-500/10 to-purple-800/20', border: 'border-purple-500/40', text: 'text-purple-400', badge: 'bg-gradient-to-r from-purple-600 to-purple-400 text-white', accent: 'text-purple-400' };
+                    if (tier.includes('balcony') || tier.includes('odc')) return { bg: 'from-blue-500/10 to-blue-800/20', border: 'border-blue-500/40', text: 'text-blue-400', badge: 'bg-gradient-to-r from-blue-600 to-blue-400 text-white', accent: 'text-blue-400' };
+                    if (tier.includes('box')) return { bg: 'from-rose-500/10 to-rose-800/20', border: 'border-rose-500/40', text: 'text-rose-400', badge: 'bg-gradient-to-r from-rose-600 to-rose-400 text-white', accent: 'text-rose-400' };
+                    return { bg: 'from-primary/10 to-primary/5', border: 'border-primary/30', text: 'text-primary', badge: 'bg-primary/20 text-primary', accent: 'text-primary' };
                 };
                 const theme = getTicketColor(mainTier);
 
                 return (
-                  <div key={booking.id} className={`flex flex-col md:flex-row bg-gradient-to-r ${theme.bg} rounded-3xl overflow-hidden border ${theme.border} hover:shadow-2xl hover:shadow-primary/5 transition-all group relative`}>
+                  <div key={booking.id} className={`flex bg-gradient-to-r ${theme.bg} rounded-2xl overflow-hidden border ${theme.border} hover:shadow-xl hover:shadow-primary/5 transition-all group relative h-48`}>
                     {/* Ticket Main Body */}
-                    <div className="p-6 md:p-8 flex-grow flex flex-col justify-between relative z-10">
-                      <div className="absolute top-1/2 -translate-y-1/2 right-10 opacity-5 pointer-events-none">
-                        <Ticket size={160} />
+                    <div className="p-5 flex-grow flex flex-col justify-between relative z-10 w-2/3">
+                      <div className="absolute top-1/2 -translate-y-1/2 right-4 opacity-5 pointer-events-none">
+                        <Ticket size={100} />
                       </div>
+                      
                       <div>
-                        <div className="flex items-center gap-3 mb-3">
-                          <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${theme.badge}`}>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className={`px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-widest shadow-sm ${theme.badge}`}>
                             {mainTier}
                           </span>
-                          <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${booking.status === 'PAID' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                          <span className={`text-[10px] font-bold uppercase tracking-wider ${booking.status === 'PAID' ? 'text-green-500' : 'text-yellow-500'}`}>
                             {booking.status}
                           </span>
                         </div>
-                        <h3 className="text-3xl font-black mb-2 group-hover:text-primary transition-colors tracking-tight">{booking.event?.title || 'Unknown Event'}</h3>
-                        <p className="text-sm text-foreground/70 flex items-center gap-2 mb-6 font-medium">
-                          <MapPin size={16} className="opacity-50" /> {booking.event?.venue} 
-                          <span className="opacity-30 mx-1">•</span> 
-                          <Calendar size={16} className="opacity-50" /> {booking.event?.eventDate ? new Date(booking.event.eventDate).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : ''}
+                        <h3 className="text-xl font-black mb-1 group-hover:text-primary transition-colors truncate">{booking.event?.title || 'Unknown Event'}</h3>
+                        <p className="text-xs text-foreground/70 flex items-center gap-1.5 font-medium truncate">
+                          <MapPin size={12} className={theme.accent} /> <span className="truncate">{booking.event?.venue}</span>
+                        </p>
+                        <p className="text-xs text-foreground/70 flex items-center gap-1.5 font-medium mt-1">
+                          <Calendar size={12} className={theme.accent} /> {booking.event?.eventDate ? new Date(booking.event.eventDate).toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }) : ''}
                         </p>
                       </div>
                       
                       <div>
-                        <p className="text-xs text-foreground/50 uppercase tracking-widest mb-2 font-semibold">Allocated Seats</p>
-                        <div className="flex gap-2 flex-wrap">
+                        <div className="flex gap-1.5 flex-wrap">
                           {booking.seats?.map((seat: any, idx: number) => (
-                            <span key={idx} className={`px-4 py-1.5 rounded-lg text-sm font-bold border ${theme.border} bg-background/50 backdrop-blur-sm shadow-sm`}>
+                            <span key={idx} className={`px-2 py-1 rounded text-[10px] font-bold border ${theme.border} bg-background/50 backdrop-blur-sm`}>
                               {seat.seatNumber}
                             </span>
                           ))}
                         </div>
-                        <p className="text-xs text-foreground/40 mt-6 font-medium">Booking Ref: #{booking.id.toString().padStart(6, '0')} • Booked on {new Date(booking.bookingDate).toLocaleDateString()}</p>
+                        <p className="text-[10px] text-foreground/40 mt-3 font-medium">Ref: #{booking.id.toString().padStart(6, '0')} • {new Date(booking.bookingDate).toLocaleDateString()}</p>
                       </div>
                     </div>
 
                     {/* Ticket Stub Line */}
-                    <div className="hidden md:flex flex-col justify-between items-center relative w-8 z-10">
-                       <div className="absolute top-[-20px] w-10 h-10 rounded-full bg-[#0a0a0a] border-b border-border shadow-inner"></div>
-                       <div className="h-full border-l-[3px] border-dashed border-border/40 my-6"></div>
-                       <div className="absolute bottom-[-20px] w-10 h-10 rounded-full bg-[#0a0a0a] border-t border-border shadow-inner"></div>
-                    </div>
-                    <div className="md:hidden flex justify-between items-center relative h-8 w-full z-10">
-                       <div className="absolute left-[-20px] w-10 h-10 rounded-full bg-[#0a0a0a] border-r border-border shadow-inner"></div>
-                       <div className="w-full border-t-[3px] border-dashed border-border/40 mx-6"></div>
-                       <div className="absolute right-[-20px] w-10 h-10 rounded-full bg-[#0a0a0a] border-l border-border shadow-inner"></div>
+                    <div className="flex flex-col justify-between items-center relative w-6 z-10 shrink-0">
+                       <div className="absolute top-[-10px] w-6 h-6 rounded-full bg-[#0a0a0a] border-b border-border shadow-inner"></div>
+                       <div className="h-full border-l-[2px] border-dashed border-border/40 my-4"></div>
+                       <div className="absolute bottom-[-10px] w-6 h-6 rounded-full bg-[#0a0a0a] border-t border-border shadow-inner"></div>
                     </div>
 
                     {/* Ticket Stub */}
-                    <div className="p-6 md:p-8 md:w-72 flex flex-col justify-center items-center bg-black/20 text-center relative z-10">
-                      <p className="text-xs text-foreground/50 uppercase tracking-widest mb-2 font-semibold">Total Amount</p>
-                      <div className={`text-4xl font-black mb-8 ${theme.text} tracking-tighter`}>Rs. {booking.totalAmount}</div>
+                    <div className="p-4 w-1/3 min-w-[120px] flex flex-col justify-center items-center bg-black/20 text-center relative z-10">
+                      <p className="text-[10px] text-foreground/50 uppercase tracking-widest mb-1 font-semibold">Total</p>
+                      <div className={`text-xl font-black mb-4 ${theme.text} tracking-tight`}>Rs. {booking.totalAmount}</div>
                       
                       {booking.status === 'PENDING_PAYMENT' ? (
                         <button 
                           onClick={() => handlePayPending(booking)}
-                          className="w-full py-4 bg-yellow-500 text-yellow-950 hover:bg-yellow-400 hover:scale-105 rounded-2xl text-sm font-black flex items-center justify-center gap-2 transition-all shadow-[0_0_20px_rgba(234,179,8,0.3)]"
+                          className="w-full py-2 bg-yellow-500 text-yellow-950 hover:bg-yellow-400 hover:scale-105 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all shadow-md"
                         >
-                          <CreditCard size={20} /> PAY NOW
+                          <CreditCard size={14} /> PAY
                         </button>
                       ) : (
                         <button 
@@ -404,16 +401,16 @@ function AttendeeDashboard() {
                             modal.onclick = () => document.body.removeChild(modal);
                             
                             const content = document.createElement('div');
-                            content.className = "bg-secondary p-8 rounded-3xl border border-border flex flex-col items-center max-w-sm w-full mx-4";
+                            content.className = "bg-secondary p-6 rounded-3xl border border-border flex flex-col items-center max-w-xs w-full mx-4";
                             content.onclick = (e) => e.stopPropagation();
                             
                             content.innerHTML = `
-                              <h3 class="text-2xl font-black mb-2 text-center">${booking.event?.title}</h3>
-                              <p class="text-foreground/70 text-sm mb-6 text-center">Scan this code at the entrance</p>
-                              <div class="bg-white p-4 rounded-xl mb-6">
-                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${booking.id}" alt="QR Code" class="w-48 h-48" />
+                              <h3 class="text-xl font-black mb-1 text-center">${booking.event?.title}</h3>
+                              <p class="text-foreground/70 text-xs mb-5 text-center">Scan this code at the entrance</p>
+                              <div class="bg-white p-3 rounded-xl mb-5">
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${booking.id}" alt="QR Code" class="w-40 h-40" />
                               </div>
-                              <button class="w-full py-3 bg-primary text-primary-foreground rounded-xl font-bold">Close</button>
+                              <button class="w-full py-2.5 bg-primary text-primary-foreground rounded-xl font-bold text-sm">Close</button>
                             `;
                             
                             const closeBtn = content.querySelector('button');
@@ -422,9 +419,9 @@ function AttendeeDashboard() {
                             modal.appendChild(content);
                             document.body.appendChild(modal);
                           }}
-                          className={`w-full py-4 ${theme.badge} hover:bg-primary hover:text-primary-foreground hover:scale-105 rounded-2xl text-sm font-black flex items-center justify-center gap-2 transition-all`}
+                          className={`w-full py-2 bg-primary/20 ${theme.text} hover:bg-primary hover:text-primary-foreground hover:scale-105 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all`}
                         >
-                          <Ticket size={20} /> VIEW QR CODE
+                          <Ticket size={14} /> QR
                         </button>
                       )}
                     </div>
