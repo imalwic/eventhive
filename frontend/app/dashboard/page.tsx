@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Ticket, Calendar, CalendarPlus, Settings, BarChart2, Users, ShieldAlert, CheckCircle2, MessageSquare, CreditCard, Image as ImageIcon, TrendingUp, PieChart as PieChartIcon, Sparkles, MapPin } from "lucide-react";
+import { Ticket, Calendar, CalendarPlus, Settings, BarChart2, Users, ShieldAlert, CheckCircle2, MessageSquare, CreditCard, Image as ImageIcon, TrendingUp, PieChart as PieChartIcon, Sparkles, MapPin, Music, Zap, Star } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -9,6 +9,14 @@ import api from "@/lib/axios";
 import { toast } from "react-hot-toast";
 import Chatbot from "@/components/Chatbot";
 import RichTextEditor from "@/components/RichTextEditor";
+
+const getCategoryIcon = (category: string) => {
+  switch(category?.toLowerCase()) {
+    case 'music': return <Music size={64} className="text-primary/50" />;
+    case 'technology': return <Zap size={64} className="text-accent/50" />;
+    default: return <Star size={64} className="text-yellow-500/50" />;
+  }
+};
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -466,12 +474,17 @@ function AttendeeDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {savedEvents.map((ev: any) => (
               <div key={ev.id} className="bg-secondary rounded-2xl overflow-hidden border border-border/50 group cursor-pointer" onClick={() => window.location.href = `/events/${ev.id}`}>
-                <div className="h-32 bg-primary/20 relative">
-                  {ev.venueImageUrl && (
-                    <img src={`http://localhost:8080${ev.venueImageUrl.startsWith('/') ? '' : '/uploads/events/'}${ev.venueImageUrl}`} alt="Event" className="w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-500" />
+                <div className="h-32 bg-gradient-to-br from-secondary/50 via-background to-border relative overflow-hidden flex items-center justify-center">
+                  {ev.venueImageUrl ? (
+                    <img src={`http://localhost:8080${ev.venueImageUrl.startsWith('/') ? '' : '/uploads/events/'}${ev.venueImageUrl}`} alt="Event" className="w-full h-full object-cover opacity-70 group-hover:scale-110 transition-transform duration-700" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-tr from-primary/20 to-accent/20 group-hover:scale-110 transition-transform duration-700">
+                       {getCategoryIcon(ev.category || '')}
+                       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
+                    </div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-secondary to-transparent"></div>
-                  <h4 className="absolute bottom-3 left-4 right-4 font-black text-lg">{ev.title}</h4>
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent"></div>
+                  <h4 className="absolute bottom-3 left-4 right-4 font-black text-lg z-10">{ev.title}</h4>
                 </div>
                 <div className="p-4">
                   <p className="text-sm text-foreground/70">{ev.venue}</p>
@@ -555,6 +568,7 @@ function AttendeeDashboard() {
                      <img src={`http://localhost:8080${ev.venueImageUrl.startsWith('/') ? '' : '/uploads/events/'}${ev.venueImageUrl}`} alt="Venue" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                    ) : (
                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-tr from-primary/20 to-accent/20 group-hover:scale-110 transition-transform duration-700">
+                        {getCategoryIcon(ev.category || '')}
                         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
                      </div>
                    )}
