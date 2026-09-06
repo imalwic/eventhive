@@ -1,6 +1,7 @@
 package com.eventhive.backend.repository;
 
 import com.eventhive.backend.entity.Booking;
+import com.eventhive.backend.entity.Event;
 import com.eventhive.backend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -24,4 +25,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     // Get total platform revenue
     @org.springframework.data.jpa.repository.Query("SELECT SUM(b.totalAmount) FROM Booking b WHERE b.status = 'PAID'")
     Double sumTotalRevenue();
+
+    // For reminder emails: all PAID bookings for a given event
+    List<Booking> findByEventAndStatus(Event event, String status);
 }

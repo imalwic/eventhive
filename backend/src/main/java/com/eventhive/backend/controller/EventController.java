@@ -34,6 +34,9 @@ public class EventController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private com.eventhive.backend.service.EmailService emailService;
+
     // අලුත් Event එකක් හදන Endpoint එක
     @PostMapping("/create")
     public ResponseEntity<?> createNewEvent(@RequestBody Event event) {
@@ -125,6 +128,10 @@ public class EventController {
         return eventRepository.findById(eventId).map(event -> {
             event.setStatus("APPROVED");
             eventRepository.save(event);
+            // Send approval email to organizer
+            if (event.getOrganizer() != null) {
+                emailService.sendEventApprovedEmail(event.getOrganizer(), event);
+            }
             return ResponseEntity.ok(java.util.Map.of("message", "Event approved successfully"));
         }).orElse(ResponseEntity.notFound().build());
     }
@@ -138,6 +145,10 @@ public class EventController {
         return eventRepository.findById(eventId).map(event -> {
             event.setStatus("REJECTED");
             eventRepository.save(event);
+            // Send rejection email to organizer
+            if (event.getOrganizer() != null) {
+                emailService.sendEventRejectedEmail(event.getOrganizer(), event);
+            }
             return ResponseEntity.ok(java.util.Map.of("message", "Event rejected"));
         }).orElse(ResponseEntity.notFound().build());
     }
