@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Ticket, CalendarPlus, Settings, BarChart2, Users, ShieldAlert, CheckCircle2, MessageSquare, CreditCard, Image as ImageIcon, TrendingUp, PieChart as PieChartIcon, Sparkles, MapPin } from "lucide-react";
+import { Ticket, Calendar, CalendarPlus, Settings, BarChart2, Users, ShieldAlert, CheckCircle2, MessageSquare, CreditCard, Image as ImageIcon, TrendingUp, PieChart as PieChartIcon, Sparkles, MapPin } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -323,43 +323,78 @@ function AttendeeDashboard() {
               <p>You haven't booked any events yet.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {bookings.map((booking: any) => (
-                <div key={booking.id} className="flex flex-col bg-secondary rounded-3xl overflow-hidden border border-border/50 hover:border-primary/50 transition-colors shadow-xl group">
-                  <div className="h-32 bg-primary/20 relative">
-                    {booking.event?.venueImageUrl && (
-                      <img src={`http://localhost:8080${booking.event.venueImageUrl.startsWith('/') ? '' : '/uploads/events/'}${booking.event.venueImageUrl}`} alt="Venue" className="w-full h-full object-cover opacity-50" />
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-secondary to-transparent"></div>
-                    <div className="absolute bottom-4 left-6 right-6 flex justify-between items-end">
-                      <h3 className="text-xl font-black">{booking.event?.title || 'Unknown Event'}</h3>
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${booking.status === 'PAID' ? 'bg-green-500/20 text-green-500' : 'bg-yellow-500/20 text-yellow-500'}`}>
-                        {booking.status}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="p-6 flex-grow flex flex-col justify-between">
-                    <div>
-                      <p className="text-sm text-foreground/70 mb-1">{booking.event?.venue} • {booking.event?.eventDate ? new Date(booking.event.eventDate).toLocaleDateString() : ''}</p>
-                      <p className="text-xs text-foreground/50 mb-4">Booked on {new Date(booking.bookingDate).toLocaleDateString()}</p>
-                      
-                      <div className="flex gap-2 flex-wrap mb-6">
-                        {booking.seats?.map((seat: any, idx: number) => (
-                          <span key={idx} className="bg-background px-3 py-1.5 rounded-lg text-xs font-bold border border-border">
-                            Seat {seat.seatNumber}
+            <div className="flex flex-col gap-6">
+              {bookings.map((booking: any) => {
+                const mainTier = booking.seats && booking.seats.length > 0 ? booking.seats[0].tierName : 'General';
+                const getTicketColor = (tierName: string) => {
+                    const tier = (tierName || '').toLowerCase();
+                    if (tier.includes('vip') || tier.includes('vvip')) return { bg: 'from-amber-500/10 to-amber-900/20', border: 'border-amber-500/30', text: 'text-amber-500', badge: 'bg-amber-500/20 text-amber-400' };
+                    if (tier.includes('balcony') || tier.includes('odc')) return { bg: 'from-blue-500/10 to-blue-900/20', border: 'border-blue-500/30', text: 'text-blue-500', badge: 'bg-blue-500/20 text-blue-400' };
+                    if (tier.includes('box')) return { bg: 'from-purple-500/10 to-purple-900/20', border: 'border-purple-500/30', text: 'text-purple-500', badge: 'bg-purple-500/20 text-purple-400' };
+                    return { bg: 'from-primary/10 to-secondary', border: 'border-primary/30', text: 'text-primary', badge: 'bg-primary/20 text-primary' };
+                };
+                const theme = getTicketColor(mainTier);
+
+                return (
+                  <div key={booking.id} className={`flex flex-col md:flex-row bg-gradient-to-r ${theme.bg} rounded-3xl overflow-hidden border ${theme.border} hover:shadow-2xl hover:shadow-primary/5 transition-all group relative`}>
+                    {/* Ticket Main Body */}
+                    <div className="p-6 md:p-8 flex-grow flex flex-col justify-between relative z-10">
+                      <div className="absolute top-1/2 -translate-y-1/2 right-10 opacity-5 pointer-events-none">
+                        <Ticket size={160} />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-3 mb-3">
+                          <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${theme.badge}`}>
+                            {mainTier}
                           </span>
-                        ))}
+                          <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${booking.status === 'PAID' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                            {booking.status}
+                          </span>
+                        </div>
+                        <h3 className="text-3xl font-black mb-2 group-hover:text-primary transition-colors tracking-tight">{booking.event?.title || 'Unknown Event'}</h3>
+                        <p className="text-sm text-foreground/70 flex items-center gap-2 mb-6 font-medium">
+                          <MapPin size={16} className="opacity-50" /> {booking.event?.venue} 
+                          <span className="opacity-30 mx-1">•</span> 
+                          <Calendar size={16} className="opacity-50" /> {booking.event?.eventDate ? new Date(booking.event.eventDate).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : ''}
+                        </p>
+                      </div>
+                      
+                      <div>
+                        <p className="text-xs text-foreground/50 uppercase tracking-widest mb-2 font-semibold">Allocated Seats</p>
+                        <div className="flex gap-2 flex-wrap">
+                          {booking.seats?.map((seat: any, idx: number) => (
+                            <span key={idx} className={`px-4 py-1.5 rounded-lg text-sm font-bold border ${theme.border} bg-background/50 backdrop-blur-sm shadow-sm`}>
+                              {seat.seatNumber}
+                            </span>
+                          ))}
+                        </div>
+                        <p className="text-xs text-foreground/40 mt-6 font-medium">Booking Ref: #{booking.id.toString().padStart(6, '0')} • Booked on {new Date(booking.bookingDate).toLocaleDateString()}</p>
                       </div>
                     </div>
-                    
-                    <div className="flex items-center justify-between pt-4 border-t border-border border-dashed">
-                      <div className="text-primary font-black text-lg">Rs. {booking.totalAmount}</div>
+
+                    {/* Ticket Stub Line */}
+                    <div className="hidden md:flex flex-col justify-between items-center relative w-8 z-10">
+                       <div className="absolute top-[-20px] w-10 h-10 rounded-full bg-[#0a0a0a] border-b border-border shadow-inner"></div>
+                       <div className="h-full border-l-[3px] border-dashed border-border/40 my-6"></div>
+                       <div className="absolute bottom-[-20px] w-10 h-10 rounded-full bg-[#0a0a0a] border-t border-border shadow-inner"></div>
+                    </div>
+                    <div className="md:hidden flex justify-between items-center relative h-8 w-full z-10">
+                       <div className="absolute left-[-20px] w-10 h-10 rounded-full bg-[#0a0a0a] border-r border-border shadow-inner"></div>
+                       <div className="w-full border-t-[3px] border-dashed border-border/40 mx-6"></div>
+                       <div className="absolute right-[-20px] w-10 h-10 rounded-full bg-[#0a0a0a] border-l border-border shadow-inner"></div>
+                    </div>
+
+                    {/* Ticket Stub */}
+                    <div className="p-6 md:p-8 md:w-72 flex flex-col justify-center items-center bg-black/20 text-center relative z-10">
+                      <p className="text-xs text-foreground/50 uppercase tracking-widest mb-2 font-semibold">Total Amount</p>
+                      <div className={`text-4xl font-black mb-8 ${theme.text} tracking-tighter`}>Rs. {booking.totalAmount}</div>
+                      
                       {booking.status === 'PENDING_PAYMENT' ? (
                         <button 
                           onClick={() => handlePayPending(booking)}
-                          className="px-4 py-2 bg-yellow-500/20 text-yellow-500 rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-yellow-500/30 transition-colors"
+                          className="w-full py-4 bg-yellow-500 text-yellow-950 hover:bg-yellow-400 hover:scale-105 rounded-2xl text-sm font-black flex items-center justify-center gap-2 transition-all shadow-[0_0_20px_rgba(234,179,8,0.3)]"
                         >
-                          <CreditCard size={16} /> Pay Now
+                          <CreditCard size={20} /> PAY NOW
                         </button>
                       ) : (
                         <button 
@@ -387,15 +422,15 @@ function AttendeeDashboard() {
                             modal.appendChild(content);
                             document.body.appendChild(modal);
                           }}
-                          className="px-4 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-primary/90 transition-colors"
+                          className={`w-full py-4 ${theme.badge} hover:bg-primary hover:text-primary-foreground hover:scale-105 rounded-2xl text-sm font-black flex items-center justify-center gap-2 transition-all`}
                         >
-                          <Ticket size={16} /> View Ticket
+                          <Ticket size={20} /> VIEW QR CODE
                         </button>
                       )}
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -510,34 +545,44 @@ function AttendeeDashboard() {
           <button onClick={() => window.location.href = "/events"} className="text-sm text-primary hover:underline font-semibold">View All</button>
         </h2>
         
-        {allEvents.length === 0 ? (
+        {allEvents.filter((ev: any) => new Date(ev.eventDate) >= new Date()).length === 0 ? (
           <div className="text-center py-12 text-foreground/50 bg-secondary/30 rounded-3xl border border-border">
             No events available right now.
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {allEvents.slice(0, 6).map((ev: any) => (
-              <div key={ev.id} className="bg-secondary rounded-3xl overflow-hidden border border-border/50 hover:border-primary/50 transition-colors shadow-lg group cursor-pointer flex flex-col" onClick={() => window.location.href = `/events/${ev.id}`}>
-                <div className="h-40 bg-primary/20 relative">
-                  {ev.venueImageUrl && (
-                    <img src={`http://localhost:8080${ev.venueImageUrl.startsWith('/') ? '' : '/uploads/events/'}${ev.venueImageUrl}`} alt="Venue" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80" />
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-secondary to-transparent"></div>
-                  <div className="absolute top-4 right-4 bg-background/80 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold border border-border text-foreground">
-                    {ev.category}
-                  </div>
+            {allEvents.filter((ev: any) => new Date(ev.eventDate) >= new Date()).slice(0, 6).map((ev: any) => (
+              <div key={ev.id} className="bg-card rounded-3xl overflow-hidden border border-border/50 hover:border-primary/50 transition-colors shadow-lg group cursor-pointer flex flex-col" onClick={() => window.location.href = `/events/${ev.id}`}>
+                <div className="h-48 bg-gradient-to-br from-secondary/50 via-background to-border relative overflow-hidden flex items-center justify-center">
+                   {ev.venueImageUrl ? (
+                     <img src={`http://localhost:8080${ev.venueImageUrl.startsWith('/') ? '' : '/uploads/events/'}${ev.venueImageUrl}`} alt="Venue" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                   ) : (
+                     <div className="w-full h-full flex items-center justify-center bg-gradient-to-tr from-primary/20 to-accent/20 group-hover:scale-110 transition-transform duration-700">
+                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
+                     </div>
+                   )}
+                   <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent"></div>
+                   
+                   <div className="absolute top-4 left-4 px-3 py-1 bg-background/80 backdrop-blur-md rounded-full text-xs font-semibold">
+                     {ev.category}
+                   </div>
+
+                   <div className="absolute top-4 right-4 px-3 py-1 bg-primary text-primary-foreground rounded-full text-xs font-bold shadow-[0_0_15px_rgba(139,92,246,0.5)] flex items-center gap-2">
+                     <Calendar size={12} />
+                     {new Date(ev.eventDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                   </div>
                 </div>
-                <div className="p-6 flex flex-col flex-grow">
+                <div className="p-6 flex flex-col flex-grow -mt-4 relative z-10 bg-card rounded-t-3xl border-t border-border/10">
                   <h3 className="text-xl font-black mb-2 group-hover:text-primary transition-colors line-clamp-1">{ev.title}</h3>
                   <div className="text-sm text-foreground/70 mb-4 flex items-center gap-2">
                     <MapPin size={16} className="text-primary/70 shrink-0" /> <span className="truncate">{ev.venue}</span>
                   </div>
-                  <div className="mt-auto pt-4 border-t border-border border-dashed flex items-center justify-between">
+                  <div className="mt-auto pt-4 border-t border-border/50 border-dashed flex items-center justify-between">
                     <div className="text-xs text-foreground/60 flex flex-col">
-                      <span className="opacity-70">Organizer</span>
+                      <span className="opacity-70 uppercase tracking-wider">Organizer</span>
                       <span className="font-bold text-foreground/90 truncate max-w-[120px]" title={ev.organizer?.name}>{ev.organizer?.name || 'Unknown Organizer'}</span>
                     </div>
-                    <div className="text-primary font-bold text-sm bg-primary/10 px-3 py-1 rounded-full">
+                    <div className="text-primary font-bold text-xs bg-primary/10 px-3 py-1.5 rounded-full uppercase tracking-wider">
                       {ev.isTicketed ? 'Ticketed' : 'Free Entry'}
                     </div>
                   </div>

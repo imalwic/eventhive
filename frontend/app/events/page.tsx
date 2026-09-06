@@ -37,11 +37,21 @@ export default function EventsPage() {
     fetchEvents();
   }, []);
 
-  const filteredEvents = events.filter(e => 
-    e.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    e.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    e.venue.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredEvents = events.filter(e => {
+    const isFuture = new Date(e.eventDate) >= new Date();
+    const matchesSearch = e.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          e.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          e.venue.toLowerCase().includes(searchTerm.toLowerCase());
+    return isFuture && matchesSearch;
+  });
+
+  const getCategoryIcon = (category: string) => {
+    switch(category.toLowerCase()) {
+      case 'music': return <Music size={64} className="text-primary/50" />;
+      case 'technology': return <Zap size={64} className="text-accent/50" />;
+      default: return <Star size={64} className="text-yellow-500/50" />;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -107,14 +117,26 @@ export default function EventsPage() {
                 onClick={() => router.push(`/events/${event.id}`)}
                 className="group rounded-3xl border border-border bg-card overflow-hidden hover:shadow-2xl hover:shadow-primary/10 transition-all hover:-translate-y-2 cursor-pointer flex flex-col"
               >
-                <div className="h-48 bg-gradient-to-br from-secondary to-border relative overflow-hidden">
-                   {(event as any).venueImageUrl && (
+                <div className="h-56 bg-gradient-to-br from-secondary/50 via-background to-border relative overflow-hidden flex items-center justify-center">
+                   {(event as any).venueImageUrl ? (
                      <img src={`http://localhost:8080${(event as any).venueImageUrl.startsWith('/') ? '' : '/uploads/events/'}${(event as any).venueImageUrl}`} alt="Venue" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                   ) : (
+                     <div className="w-full h-full flex items-center justify-center bg-gradient-to-tr from-primary/20 to-accent/20 group-hover:scale-110 transition-transform duration-700">
+                        {getCategoryIcon(event.category || '')}
+                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
+                     </div>
                    )}
-                   <div className="absolute inset-0 bg-primary/10 group-hover:bg-primary/20 transition-colors"></div>
+                   <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent"></div>
+                   
                    <div className="absolute top-4 left-4 px-3 py-1 bg-background/80 backdrop-blur-md rounded-full text-xs font-semibold">
                      {event.category}
                    </div>
+
+                   <div className="absolute top-4 right-16 px-4 py-1 bg-primary text-primary-foreground rounded-full text-xs font-bold shadow-[0_0_15px_rgba(139,92,246,0.5)] flex items-center gap-2">
+                     <Calendar size={12} />
+                     {new Date(event.eventDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                   </div>
+
                    <button 
                      onClick={(e) => {
                        e.stopPropagation();
@@ -130,34 +152,34 @@ export default function EventsPage() {
                        }
                        localStorage.setItem('savedEvents', JSON.stringify(newSaved));
                      }}
-                     className="absolute top-4 right-4 h-10 w-10 bg-background/80 backdrop-blur-md rounded-full flex items-center justify-center text-foreground/50 hover:text-pink-500 hover:bg-background transition-all z-10"
+                     className="absolute top-4 right-4 h-8 w-8 bg-background/80 backdrop-blur-md rounded-full flex items-center justify-center text-foreground/50 hover:text-pink-500 hover:bg-background transition-all z-10"
                    >
-                     <Heart size={18} />
+                     <Heart size={16} />
                    </button>
                 </div>
-                <div className="p-6 flex-1 flex flex-col">
+                <div className="p-6 flex-1 flex flex-col -mt-4 relative z-10 bg-card rounded-t-3xl">
                   <h3 className="text-2xl font-bold mb-2 group-hover:text-primary transition-colors">{event.title}</h3>
                   
-                  <div className="space-y-2 mb-6 text-foreground/70 text-sm">
-                    <div className="flex items-center gap-2">
-                      <Calendar size={16} className="text-primary" />
-                      <span>{new Date(event.eventDate).toLocaleDateString()}</span>
+                  <div className="space-y-3 mb-6 text-foreground/70 text-sm">
+                    <div className="flex items-center gap-3 bg-secondary/30 p-2 rounded-xl">
+                      <Calendar size={18} className="text-primary" />
+                      <span className="font-medium text-foreground">{new Date(event.eventDate).toLocaleString(undefined, { weekday: 'long', hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <MapPin size={16} className="text-accent" />
-                      <span>{event.venue}</span>
+                    <div className="flex items-center gap-3 bg-secondary/30 p-2 rounded-xl">
+                      <MapPin size={18} className="text-accent" />
+                      <span className="font-medium text-foreground">{event.venue}</span>
                     </div>
                   </div>
 
                   <div className="mt-auto flex items-center justify-between pt-4 border-t border-border">
                     <div>
-                      <p className="text-xs text-foreground/50 uppercase font-semibold">Starting from</p>
-                      <p className="text-xl font-bold text-foreground">
+                      <p className="text-xs text-foreground/50 uppercase font-semibold tracking-wider">Starting from</p>
+                      <p className="text-2xl font-black text-foreground">
                         Rs. {event.ticketCategories?.length ? Math.min(...event.ticketCategories.map(tc => tc.price)).toLocaleString() : "0"}
                       </p>
                     </div>
-                    <button className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                      <ArrowRight size={18} />
+                    <button className="h-12 w-12 rounded-full bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-all group-hover:rotate-45">
+                      <ArrowRight size={20} />
                     </button>
                   </div>
                 </div>
